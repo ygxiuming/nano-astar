@@ -45,9 +45,11 @@ jobs:
         with:
           output-dir: dist
         env:
-          # match requires-python = ">=3.9" and the test matrix; musllinux
-          # wheels are skipped (no musl nanobind/numpy story worth shipping)
+          # match requires-python = ">=3.9" and the test matrix
           CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
+          # x86_64 only: the i686 build fails (no 32-bit nanobind/numpy
+          # wheels) and musllinux is not worth shipping
+          CIBW_ARCHS_LINUX: "x86_64"
           CIBW_SKIP: "*-musllinux*"
       - uses: actions/upload-artifact@v4
         with:

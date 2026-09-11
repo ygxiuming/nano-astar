@@ -1,32 +1,52 @@
-# Auto-generated release notes template.
-# GitHub buckets merged PRs into these categories by label when a release is
-# created with "generate_release_notes" (see .github/workflows/release.yml).
+# Release notes categorization (conventional-commits style, like
+# googleapis/release-please). GitHub buckets merged PRs into these
+# categories by label when notes are auto-generated; the human-written
+# CHANGELOG.md section for the tag is prepended by the Release workflow.
 changelog:
   exclude:
     labels:
       - ignore-for-release
     authors:
       - dependabot
+      - github-actions
+      - renovate
   categories:
+    - title: ⚠️ Breaking Changes
+      labels:
+        - breaking-change
     - title: 🚀 Features
       labels:
         - feature
         - enhancement
-    - title: 🐛 Fixes
+        - feat
+    - title: 🐛 Bug Fixes
       labels:
         - bug
         - fix
+        - bugfix
     - title: ⚡ Performance
       labels:
         - performance
-    - title: 📖 Documentation
+        - perf
+    - title: 📚 Documentation
       labels:
         - documentation
-    - title: 🧰 Maintenance
+        - docs
+    - title: ✅ Testing
+      labels:
+        - test
+        - tests
+        - testing
+    - title: 🔧 Maintenance
       labels:
         - chore
-        - dependencies
+        - refactor
         - ci
-    - title: Other changes
+        - build
+    - title: 📦 Dependencies
+      labels:
+        - dependencies
+        - deps
+    - title: Other Changes
       labels:
         - "*"
