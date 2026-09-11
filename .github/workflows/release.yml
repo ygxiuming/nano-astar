@@ -1,8 +1,8 @@
 # Release pipeline: push a tag like `v0.1.0` to
 #   1. build the sdist and wheels for Linux/macOS/Windows (cibuildwheel),
-#   2. publish everything to PyPI via trusted publishing (no API token —
-#      configure the `pypi` environment + pending publisher on PyPI once;
-#      fallback: remove `id-token` and set a PYPI_API_TOKEN repo secret),
+#   2. publish everything to PyPI with an API token — add a repo secret named
+#      PYPI_API_TOKEN (Settings → Secrets and variables → Actions) holding a
+#      PyPI API token, scoped to the project once it exists,
 #   3. create a GitHub Release whose notes are auto-generated from merged
 #      PRs, categorized by label via .github/release.yml.
 name: Release
@@ -41,6 +41,11 @@ jobs:
       - uses: pypa/cibuildwheel@v2.21
         with:
           output-dir: dist
+        env:
+          # match requires-python = ">=3.9"; skip musllinux (no musl
+          # nanobind/numpy story worth shipping)
+          CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
+          CIBW_SKIP: "*-musllinux*"
       - uses: actions/upload-artifact@v4
         with:
           name: dist-wheels-${{ matrix.os }}
@@ -50,9 +55,6 @@ jobs:
     name: Publish to PyPI
     needs: [sdist, wheels]
     runs-on: ubuntu-latest
-    environment: pypi
-    permissions:
-      id-token: write  # PyPI trusted publishing
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -60,6 +62,8 @@ jobs:
           merge-multiple: true
           path: dist
       - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
 
   github-release:
     name: GitHub Release

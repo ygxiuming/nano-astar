@@ -44,6 +44,11 @@ jobs:
       - uses: pypa/cibuildwheel@v2.21
         with:
           output-dir: dist
+        env:
+          # match requires-python = ">=3.9" and the test matrix; musllinux
+          # wheels are skipped (no musl nanobind/numpy story worth shipping)
+          CIBW_BUILD: "cp39-* cp310-* cp311-* cp312-*"
+          CIBW_SKIP: "*-musllinux*"
       - uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.os }}
