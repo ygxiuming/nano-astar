@@ -11,16 +11,17 @@ from nano_astar import astar
 
 
 def main() -> None:
-    rng = np.random.default_rng(3)
-    grid = (rng.random((25, 60)) < 0.25).astype(np.uint8)
     start, goal = (0, 0), (24, 59)
-    grid[start] = 0
-    grid[goal] = 0
-
-    result = astar(grid, start, goal, heuristic="octile", diagonal=True)
-    if result is None:
-        print("no path; try another seed")
-        return
+    seed = 0
+    while True:
+        rng = np.random.default_rng(seed)
+        grid = (rng.random((25, 60)) < 0.25).astype(np.uint8)
+        grid[start] = 0
+        grid[goal] = 0
+        result = astar(grid, start, goal, heuristic="octile", diagonal=True)
+        if result is not None:
+            break
+        seed += 1
     path, cost = result
 
     canvas = np.full(grid.shape, " ", dtype="<U1")
