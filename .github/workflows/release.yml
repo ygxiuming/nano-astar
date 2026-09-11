@@ -70,7 +70,11 @@ jobs:
 
   github-release:
     name: GitHub Release
-    needs: [publish-pypi]
+    # GitHub Release should still be created if the PyPI upload step fails
+    # (e.g. the PYPI_API_TOKEN secret is not configured yet), as long as all
+    # artifacts built successfully.
+    needs: [sdist, wheels, publish-pypi]
+    if: always() && needs.sdist.result == 'success' && needs.wheels.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
