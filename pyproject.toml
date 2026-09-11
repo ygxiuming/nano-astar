@@ -35,8 +35,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/nano-astar/nano-astar"
-Repository = "https://github.com/nano-astar/nano-astar"
+Homepage = "https://github.com/ygxiuming/nano-astar"
+Repository = "https://github.com/ygxiuming/nano-astar"
 
 [tool.scikit-build]
 minimum-version = "0.10"
