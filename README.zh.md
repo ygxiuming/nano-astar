@@ -8,7 +8,7 @@
 
 **基于 C++ 内核的占用网格 A* 寻路 —— 实测仅搜索阶段比 networkx 快 14–18 倍，含构图快 52–63 倍，4 连通整数网格最高 464 倍**（精确数字、测试环境与复现脚本见 [BENCH.md](BENCH.md)）。
 
-![A* 迷宫探索动画](docs/demo.gif)
+![A* 迷宫探索动画](https://raw.githubusercontent.com/ygxiuming/nano-astar/main/docs/demo.gif)
 
 ## 为什么选择 nano-astar
 
@@ -70,7 +70,7 @@ numpy 2.4.6、MSVC 19.51（`/O2`）、Windows 11。
 | 500×500 | 4.02 ms | 109.3 ms | 718.4 ms | 27× | 179× |
 | 1000×1000 | 7.65 ms | 124.3 ms | 3546.6 ms | 16× | 464× |
 
-![benchmark 图表](docs/benchmark.png)
+![benchmark 图表](https://raw.githubusercontent.com/ygxiuming/nano-astar/main/docs/benchmark.png)
 
 复现：
 
@@ -84,7 +84,7 @@ python tools/make_plots.py          # 重新生成图表
 同一张图、四种内置启发式（4 连通）。蓝色 = 探索过的格子，红色 = 最终路径。
 启发式越紧，探索越少 —— 四种返回的最优代价完全相同。
 
-![启发式对比](docs/heuristics.png)
+![启发式对比](https://raw.githubusercontent.com/ygxiuming/nano-astar/main/docs/heuristics.png)
 
 ## 什么时候不要用 nano-astar
 

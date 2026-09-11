@@ -8,7 +8,7 @@ English | [中文](README.zh.md)
 
 **A* pathfinding on occupancy grids with a C++ core — measured 14–18× faster than networkx search alone, 52–63× faster including graph construction, and up to 464× on 4-connected integer grids** (exact numbers, environment and reproduction script in [BENCH.md](BENCH.md)).
 
-![A* exploring a maze](docs/demo.gif)
+![A* exploring a maze](https://raw.githubusercontent.com/ygxiuming/nano-astar/main/docs/demo.gif)
 
 ## Why nano-astar
 
@@ -72,7 +72,7 @@ queue's home turf:
 | 500×500 | 4.02 ms | 109.3 ms | 718.4 ms | 27× | 179× |
 | 1000×1000 | 7.65 ms | 124.3 ms | 3546.6 ms | 16× | 464× |
 
-![benchmark chart](docs/benchmark.png)
+![benchmark chart](https://raw.githubusercontent.com/ygxiuming/nano-astar/main/docs/benchmark.png)
 
 Reproduce:
 
@@ -87,7 +87,7 @@ Same map, four built-in heuristics (4-connected). Blue = cells explored,
 red = final path. A tighter heuristic explores less — all four still return
 the same optimal cost.
 
-![heuristic comparison](docs/heuristics.png)
+![heuristic comparison](https://raw.githubusercontent.com/ygxiuming/nano-astar/main/docs/heuristics.png)
 
 ## When NOT to use nano-astar
 
