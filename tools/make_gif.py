@@ -25,21 +25,23 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 OUT = REPO_ROOT / "docs" / "demo.gif"
 
 SIZE = 60
-EXPLORE_FRAMES = 355      # + ~15 path-growth + 20 hold frames <= 400 total
+EXPLORE_FRAMES = 110      # + 15 path-growth + 20 hold ≈ 145 frames ≈ 6.5s
 PATH_FRAMES = 15
 HOLD_FRAMES = 20
+FRAME_MS = 45
 DPI = 100
-FIGSIZE = 3.6             # 360x360 px output
+FIGSIZE = 6.0             # 600x600 px output — stays crisp on HiDPI/GitHub
 
 # palette (RGB)
 FREE = np.array([255, 255, 255], np.uint8)
-WALL = np.array([17, 17, 17], np.uint8)
+WALL = np.array([51, 51, 51], np.uint8)      # dark gray, not pure black
 FRONTIER = np.array([255, 127, 14], np.uint8)
 PATH = np.array([214, 39, 40], np.uint8)
 START = np.array([44, 160, 44], np.uint8)
 GOAL = np.array([148, 103, 189], np.uint8)
 CLOSED_LO = np.array([222, 235, 247], float)   # lightest blue
 CLOSED_HI = np.array([107, 174, 214], float)   # deepest blue
+MARKER = 1  # start/goal markers cover (2*MARKER+1)^2 cells
 
 
 def make_maze(size: int, seed: int = 7) -> np.ndarray:
@@ -102,6 +104,14 @@ def shared_palette() -> Image.Image:
     return pal
 
 
+def mark(rgb: np.ndarray, cell, color) -> None:
+    """Draw a (2*MARKER+1)^2 block clipped to the grid — visible S/G markers."""
+    r, c = cell
+    r0, r1 = max(0, r - MARKER), min(rgb.shape[0], r + MARKER + 1)
+    c0, c1 = max(0, c - MARKER), min(rgb.shape[1], c + MARKER + 1)
+    rgb[r0:r1, c0:c1] = color
+
+
 def main() -> None:
     grid = make_maze(SIZE)
     start, goal = (1, 1), (57, 57)
@@ -148,8 +158,8 @@ def main() -> None:
                     frontier |= shifted
             frontier &= ~closed_mask & (grid == 0)
             rgb[frontier] = FRONTIER
-        rgb[start] = START
-        rgb[goal] = GOAL
+        mark(rgb, start, START)
+        mark(rgb, goal, GOAL)
         frames.append(render(rgb))
         if k == n_closed:
             final_cells = rgb  # keep the 60x60 cell array for path overlay
@@ -160,8 +170,8 @@ def main() -> None:
         upto = (f + 1) * n // PATH_FRAMES
         arr = final_cells.copy()
         arr[path[:upto, 0], path[:upto, 1]] = PATH
-        arr[start] = START
-        arr[goal] = GOAL
+        mark(arr, start, START)
+        mark(arr, goal, GOAL)
         frames.append(render(arr))
     frames.extend([frames[-1]] * HOLD_FRAMES)
 
@@ -170,7 +180,7 @@ def main() -> None:
                for f in frames]
     OUT.parent.mkdir(parents=True, exist_ok=True)
     qframes[0].save(OUT, save_all=True, append_images=qframes[1:],
-                    duration=40, loop=0, optimize=False, disposal=0)
+                    duration=FRAME_MS, loop=0, optimize=False, disposal=0)
     size_mb = OUT.stat().st_size / 1e6
     print(f"{len(frames)} frames -> {OUT} ({size_mb:.2f} MB)")
     if len(frames) > 400:

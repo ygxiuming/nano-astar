@@ -1,11 +1,12 @@
 # nano-astar
 
-**[English README → README.md](README.md)**
+[English](README.md) | 中文
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/ygxiuming/nano-astar/actions/workflows/ci.yml/badge.svg)](https://github.com/ygxiuming/nano-astar/actions/workflows/ci.yml)
+[![PyPI](https://img.shields.io/pypi/v/nano-astar.svg)](https://pypi.org/project/nano-astar/)
 [![Python](https://img.shields.io/badge/python-3.9%20–%203.12-blue.svg)](https://www.python.org)
 
-**基于 C++ 内核的占用网格 A* 寻路 —— 实测仅搜索阶段比 networkx 快 14–17 倍，含构图快 50–62 倍**（精确数字、测试环境与复现脚本见 [BENCH.md](BENCH.md)）。
+**基于 C++ 内核的占用网格 A* 寻路 —— 实测仅搜索阶段比 networkx 快 14–18 倍，含构图快 52–63 倍，4 连通整数网格最高 464 倍**（精确数字、测试环境与复现脚本见 [BENCH.md](BENCH.md)）。
 
 ![A* 迷宫探索动画](docs/demo.gif)
 
@@ -21,9 +22,10 @@
 ## 安装与 30 秒上手
 
 ```bash
-pip install nano-astar        # PyPI（发布后）
-pip install .                 # 源码目录
+pip install nano-astar
 ```
+
+源码安装：`pip install .`
 
 ```python
 import numpy as np
@@ -47,17 +49,26 @@ path, cost, history = astar(grid, (0, 0), (99, 99), return_history=True)
 
 ## Benchmark
 
-30% 障碍率随机网格，8 连通，两侧均用 octile 启发式，预热后取中位数。
-完整表格、公平性说明与复现脚本见 [BENCH.md](BENCH.md)。环境：
-Python 3.11.15、networkx 3.6.1、numpy 2.4.6、MSVC 19.51（`/O2`）、Windows 11。
+30% 障碍率随机网格，预热后取中位数，每次运行都与 networkx 交叉校验代价
+（误差 < 1e-6）。完整方法学（重复次数、种子、公平性说明）与复现脚本见
+[BENCH.md](BENCH.md)。环境：Python 3.11.15、networkx 3.6.1、
+numpy 2.4.6、MSVC 19.51（`/O2`）、Windows 11。
+
+8 连通网格，两侧均用 octile 启发式：
 
 | 网格 | nano-astar | networkx（仅搜索） | networkx（构图+搜索） | 加速（仅搜索） | 加速（含构图） |
 |---|---|---|---|---|---|
-| 100×100 | 0.65 ms | 9.4 ms | 40.6 ms | 14× | 62× |
-| 500×500 | 26.2 ms | 392.6 ms | 1317.2 ms | 15× | 50× |
-| 1000×1000 | 135.9 ms | 2379.2 ms | 7870.6 ms | 17× | 58× |
+| 100×100 | 0.66 ms | 9.3 ms | 40.2 ms | 14× | 61× |
+| 500×500 | 24.4 ms | 360.0 ms | 1273.4 ms | 15× | 52× |
+| 1000×1000 | 115.9 ms | 2030.3 ms | 7304.9 ms | 18× | 63× |
 
-每次运行都与 networkx 交叉校验代价：误差 < 1e-6。
+4 连通整数网格，两侧均用 manhattan 启发式 —— 桶队列的主场：
+
+| 网格 | nano-astar | networkx（仅搜索） | networkx（构图+搜索） | 加速（仅搜索） | 加速（含构图） |
+|---|---|---|---|---|---|
+| 100×100 | 0.07 ms | 3.1 ms | 289.2 ms | 43× | 4037× |
+| 500×500 | 4.02 ms | 109.3 ms | 718.4 ms | 27× | 179× |
+| 1000×1000 | 7.65 ms | 124.3 ms | 3546.6 ms | 16× | 464× |
 
 ![benchmark 图表](docs/benchmark.png)
 
@@ -80,8 +91,8 @@ python tools/make_plots.py          # 重新生成图表
 - **通用图。** 带属性的节点、边权重、非网格拓扑都不在范围内 —— 输入就是二值占用网格。请用 networkx、rustworkx 等图库。
 - **自定义 Python 启发式。** 没有回调接口：四个内置启发式全部 C++ 内联，这正是速度的来源。需要领域特定启发式请 fork 后在 `src/cpp/heuristics.hpp` 里加。
 - **带权地形。** 所有可走格代价相同（正交 1，对角 `sqrt(2)`）。每格不同通行代价的 costmap 需要别的引擎。
-- **桶队列帮不上忙的场景。** 桶队列只在 4 连通整数代价网格（`diagonal=False`）启用；`diagonal=True` 时代价是 `sqrt(2)` 的无理数倍，引擎走 4 叉堆 —— 这是设计使然。整数网格上桶队列实测快 1.3–2.4 倍（[BENCH.md](BENCH.md)），8 连通负载放弃的就是这个数。
-- **`manhattan` 搭配 `diagonal=True`。** 曼哈顿在 8 连通网格上高估代价，会静默返回次优路径。8 连通请用默认的 `octile`。
+- **桶队列帮不上忙的场景。** 桶队列只在 4 连通整数代价网格（`diagonal=False`）启用；`diagonal=True` 时代价是 `sqrt(2)` 的无理数倍，引擎走 4 叉堆 —— 这是设计使然。整数网格上桶队列实测比堆快 1.3–2.4 倍（[BENCH.md](BENCH.md)），8 连通负载放弃的就是这个数。
+- **`manhattan` 搭配 `diagonal=True`。** 曼哈顿在 8 连通网格上高估代价、会返回次优路径，nano-astar 会抛 `RuntimeWarning`。8 连通请用默认的 `octile`。
 
 ## API
 
@@ -127,4 +138,4 @@ tools/                    smoke 自检（纯 C++）、GIF/图表生成器
 
 ## 许可证
 
-MIT —— 见 [LICENSE](LICENSE)。
+MIT

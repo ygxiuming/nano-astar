@@ -6,6 +6,7 @@ nanobind bindings, GIL released during search.
 
 from __future__ import annotations
 
+import warnings
 from typing import Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -78,6 +79,13 @@ def astar(
     if heuristic not in _HEURISTICS:
         raise ValueError(
             f"unknown heuristic {heuristic!r}; expected one of {_HEURISTICS}"
+        )
+    if diagonal and heuristic == "manhattan":
+        warnings.warn(
+            "manhattan is inadmissible on 8-connected grids; the returned "
+            "path may be suboptimal. Use 'octile' (the default) instead.",
+            RuntimeWarning,
+            stacklevel=2,
         )
 
     # Zero-copy fast path: uint8 + C-contiguous goes straight to C++.

@@ -1,12 +1,12 @@
 # nano-astar
 
-**[中文文档 → README.zh.md](README.zh.md)**
+English | [中文](README.zh.md)
 
 [![CI](https://github.com/ygxiuming/nano-astar/actions/workflows/ci.yml/badge.svg)](https://github.com/ygxiuming/nano-astar/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/nano-astar.svg)](https://pypi.org/project/nano-astar/)
 [![Python](https://img.shields.io/badge/python-3.9%20–%203.12-blue.svg)](https://www.python.org)
 
-**A* pathfinding on occupancy grids with a C++ core — measured 14–17× faster than networkx search alone, 50–62× faster including graph construction** ([BENCH.md](BENCH.md) for the exact numbers, environment and reproduction script).
+**A* pathfinding on occupancy grids with a C++ core — measured 14–18× faster than networkx search alone, 52–63× faster including graph construction, and up to 464× on 4-connected integer grids** (exact numbers, environment and reproduction script in [BENCH.md](BENCH.md)).
 
 ![A* exploring a maze](docs/demo.gif)
 
@@ -17,14 +17,15 @@
 - **Real multithreading.** The GIL is released for the entire search (`nb::call_guard<nb::gil_scoped_release>`), so threads truly run in parallel — measured **2.9× on 4 threads** ([test_gil_released_under_threads](tests/test_api.py)).
 - **Zero-copy numpy in, numpy out.** A contiguous `uint8` grid is passed to C++ without copying; the path comes back as an `(n, 2)` `int32` array.
 - **One dependency.** Runtime: `numpy` only. Bindings via [nanobind](https://github.com/wjakob/nanobind), build via scikit-build-core.
-- **Battle-tested against a reference implementation.** 200 randomized grids are differentially tested against networkx A* — reachability and optimal cost must match exactly (integer) or within 1e-6 (float) ([tests/test_correctness.py](tests/test_correctness.py)).
+- **Differentially tested against a reference implementation.** 200 randomized grids are checked against networkx A* — reachability and optimal cost must match exactly (integer) or within 1e-6 (float) ([tests/test_correctness.py](tests/test_correctness.py)).
 
 ## Install & 30-second quickstart
 
 ```bash
-pip install nano-astar        # from PyPI (once published)
-pip install .                 # from a source checkout
+pip install nano-astar
 ```
+
+From a source checkout: `pip install .`
 
 ```python
 import numpy as np
@@ -48,18 +49,28 @@ Terminal demo: `python examples/demo.py`
 
 ## Benchmarks
 
-Random grids with 30% obstacles, 8-connected moves, octile heuristic on both
-sides, medians after warmup. Full table, fairness notes and the reproduction
-script: [BENCH.md](BENCH.md). Environment: Python 3.11.15, networkx 3.6.1,
+Random grids with 30% obstacles, medians after warmup, costs cross-checked
+against networkx on every run (identical within 1e-6). Full methodology —
+repetition counts, seeds, fairness notes — and the reproduction script:
+[BENCH.md](BENCH.md). Environment: Python 3.11.15, networkx 3.6.1,
 numpy 2.4.6, MSVC 19.51 (`/O2`), Windows 11.
+
+8-connected grids, octile heuristic on both sides:
 
 | grid | nano-astar | networkx (search only) | networkx (build + search) | speedup (search) | speedup (incl. build) |
 |---|---|---|---|---|---|
-| 100×100 | 0.65 ms | 9.4 ms | 40.6 ms | 14× | 62× |
-| 500×500 | 26.2 ms | 392.6 ms | 1317.2 ms | 15× | 50× |
-| 1000×1000 | 135.9 ms | 2379.2 ms | 7870.6 ms | 17× | 58× |
+| 100×100 | 0.66 ms | 9.3 ms | 40.2 ms | 14× | 61× |
+| 500×500 | 24.4 ms | 360.0 ms | 1273.4 ms | 15× | 52× |
+| 1000×1000 | 115.9 ms | 2030.3 ms | 7304.9 ms | 18× | 63× |
 
-Costs cross-checked against networkx on every run: identical within 1e-6.
+4-connected integer grids, manhattan heuristic on both sides — the bucket
+queue's home turf:
+
+| grid | nano-astar | networkx (search only) | networkx (build + search) | speedup (search) | speedup (incl. build) |
+|---|---|---|---|---|---|
+| 100×100 | 0.07 ms | 3.1 ms | 289.2 ms | 43× | 4037× |
+| 500×500 | 4.02 ms | 109.3 ms | 718.4 ms | 27× | 179× |
+| 1000×1000 | 7.65 ms | 124.3 ms | 3546.6 ms | 16× | 464× |
 
 ![benchmark chart](docs/benchmark.png)
 
@@ -94,12 +105,12 @@ the same optimal cost.
   for 4-connected integer-cost grids (`diagonal=False`). With
   `diagonal=True`, costs are irrational multiples of `sqrt(2)` and the
   engine uses the 4-ary heap instead — by design, not by accident. On
-  integer grids the bucket queue is 1.3–2.4× faster (measured,
-  [BENCH.md](BENCH.md)); if your workload is 8-connected, that is the
-  number you give up.
+  integer grids the bucket queue is 1.3–2.4× faster than the heap
+  (measured, [BENCH.md](BENCH.md)); if your workload is 8-connected, that
+  is the number you give up.
 - **`manhattan` with `diagonal=True`.** Manhattan overestimates on
-  8-connected grids and silently returns suboptimal paths. Use `octile`
-  (the default) there.
+  8-connected grids and would return suboptimal paths, so nano-astar emits
+  a `RuntimeWarning`. Use `octile` (the default) there.
 
 ## API
 
@@ -148,4 +159,4 @@ tools/                    smoke test (pure C++), GIF/chart generators
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT

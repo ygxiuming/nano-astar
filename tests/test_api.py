@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import threading
 import time
+import warnings
 
 import numpy as np
 import pytest
@@ -74,6 +75,16 @@ def test_unreachable_returns_none_not_raise():
     grid = np.ones((8, 8), dtype=np.uint8)
     grid[0, 0] = grid[7, 7] = 0
     assert astar(grid, (0, 0), (7, 7)) is None
+
+
+def test_manhattan_8conn_warns():
+    grid = np.zeros((10, 10), dtype=np.uint8)
+    with pytest.warns(RuntimeWarning, match="inadmissible"):
+        astar(grid, (0, 0), (9, 9), heuristic="manhattan", diagonal=True)
+    # 4-connected manhattan is admissible: no warning
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        astar(grid, (0, 0), (9, 9), heuristic="manhattan", diagonal=False)
 
 
 def test_start_equals_goal():

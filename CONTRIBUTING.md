@@ -32,14 +32,32 @@ and ninja are pulled in automatically as build requirements.
 ## Checks before sending a PR
 
 ```bash
-cl /std:c++17 /O2 /EHsc /I src/cpp tools/smoke.cpp   # C++ smoke test
+# C++ smoke test — Windows (MSVC):
+cl /std:c++17 /O2 /EHsc /I src/cpp tools/smoke.cpp /Fe:build\smoke.exe
 build\smoke.exe
+# Linux / macOS:
+g++ -std=c++17 -O2 -Isrc/cpp tools/smoke.cpp -o /tmp/smoke && /tmp/smoke
+
 pytest tests/ -v                  # must be fully green
 python tests/bench_vs_networkx.py # if you touched the engine hot path
 ```
 
 If your change affects performance, regenerate `BENCH.md` and the charts
 (`python tools/make_plots.py`) and include the diff in your PR.
+
+## Releasing
+
+Releases are automated (`.github/workflows/release.yml`):
+
+1. Bump `version` in `pyproject.toml`, update `CHANGELOG.md`, merge to main.
+2. `git tag vX.Y.Z && git push origin vX.Y.Z`
+3. CI builds the sdist + wheels (Linux/macOS/Windows via cibuildwheel),
+   publishes to PyPI (trusted publishing, `pypi` environment), and creates a
+   GitHub Release whose notes are auto-generated from PR labels
+   (`.github/release.yml`).
+
+Maintainer one-time setup: on PyPI, add a *pending publisher* for this repo
+(workflow `release.yml`, environment `pypi`). No API token needed.
 
 ## Reporting issues
 
