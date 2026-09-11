@@ -4,7 +4,7 @@ build-backend = "scikit_build_core.build"
 
 [project]
 name = "nano-astar"
-version = "0.1.1"
+version = "0.1.2"
 description = "Tiny, fast A* pathfinding on occupancy grids: C++ core, bucket queue for integer costs, nanobind bindings, GIL-free."
 readme = "README.md"
 requires-python = ">=3.9"
