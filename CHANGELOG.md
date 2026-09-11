@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-09-12
+
+### Fixed
+
+- README images (demo GIF, benchmark and heuristic charts) now use absolute
+  URLs, so they render on the PyPI project page as well as on GitHub.
+
+### Changed
+
+- CI and release pipelines build x86_64 Linux wheels only (the 32-bit i686
+  build had no installable nanobind/numpy dependencies); musllinux is skipped.
+- Release pipeline publishes to PyPI via the `PYPI_API_TOKEN` repository
+  secret with `skip-existing`, and GitHub Release notes are assembled from
+  this changelog plus auto-categorized PR notes.
+- Repository topics added for discoverability (a-star, pathfinding, astar,
+  nanobind, numpy, cpp, motion-planning, networkx, python-bindings).
+
 ## [0.1.0] - 2026-09-11
 
 ### Added

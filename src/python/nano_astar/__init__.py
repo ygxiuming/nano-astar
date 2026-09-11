@@ -13,7 +13,7 @@ import numpy as np
 
 from ._core import astar as _astar_cpp
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __all__ = ["astar", "__version__"]
 
 _HEURISTICS = ("octile", "manhattan", "euclidean", "diagonal")
